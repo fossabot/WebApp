@@ -24,6 +24,12 @@
       </span>
       {{ $t('component.admin.users', 'Benutzer') }}
     </nuxt-link>
+    <nuxt-link to="/admin/comments" class="menu-item">
+      <span class="menu-icon">
+        <hc-icon icon="comments"></hc-icon>
+      </span>
+      {{ $t('component.admin.comments', 'Kommentare') }}
+    </nuxt-link>
   </nav>
 </template>
 
