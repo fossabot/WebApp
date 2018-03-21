@@ -1,64 +1,67 @@
 <template>
-  <section class="">
-    <h1 class="is-size-3">{{ $t('component.admin.manageUsers', 'Manage Users') }}</h1>
-    <br>
-    <b-tabs v-model="activeTab" type="is-boxed">
-      <b-tab-item label="Users">
-        <no-ssr>
-          <v2-table :data="users.data"
-                    :loading="usersLoading"
-                    :total="users.total"
-                    :shown-pagination="true"
-                    :pagination-info="paginationInfo"
-                    @page-change="handlePageChange">
-            <v2-table-column label="Name" prop="name" align="left" width="250">
-              <template slot-scope="row">
-                <div @click="openProfile(row)" style="white-space: nowrap;" :class="{'link': !!row.slug}" class="cell-name">
-                  <hc-avatar :user="row" style="display: inline-block; float: left;" />&nbsp;<div style="display: inline-block; padding: 5px 10px;">{{ row.name }}</div>
-                </div>
-              </template>
-            </v2-table-column>
-            <v2-table-column label="Verified" prop="isVerified" align="left">
-              <template slot-scope="row">
-                <i v-show="row.isVerified" class="fa fa-check-circle"></i>
-              </template>
-            </v2-table-column>
-            <v2-table-column label="Lang" prop="language" align="left">
-              <template slot-scope="row">
-                <template v-if="row.language">
-                  <img width="16" :src="`/assets/svg/flags/${row.language}.svg`" />
-                </template>
-                <template v-else>
-                  -
-                </template>
-              </template>
-            </v2-table-column>
-            <v2-table-column label="Role" prop="role" align="left"></v2-table-column>
-          </v2-table>
-        </no-ssr>
-      </b-tab-item>
-      <b-tab-item label="Invite Codes">
-        <div class="field isGrouped columns">
-          <div class="control column">
-            <textarea v-model.trim="form.codes" class="textarea" rows="8" placeholder="emails"></textarea>
-          </div>
-          <div class="control column">
-            <textarea class="textarea is-disabled" rows="8" readonly placeholder="results">{{ results }}</textarea>
-          </div>
-        </div>
+    <section class="">
+        <h1 class="is-size-3">{{ $t('component.admin.manageUsers', 'Manage Users') }}</h1>
+        <br>
         <div class="field">
-          <div class="control">
-            <hc-button color="danger"
-                      @click="generateInviteCodes()"
-                      :isLoading="isLoading"
-                      :disabled="isLoading">
-              <hc-icon set="fa" icon="magic"></hc-icon> &nbsp;<strong>{{ $t('component.admin.-', 'Generate Invite-Codes') }}</strong>
-            </hc-button>
-          </div>
+            <p class="control"><input type="text" placeholder="search Users" v-model="userSearch" class="input"></p>
         </div>
-      </b-tab-item>
-    </b-tabs>
-  </section>
+        <b-tabs v-model="activeTab" type="is-boxed">
+            <b-tab-item label="Users">
+                <no-ssr>
+                    <v2-table :data="users.data"
+                              :loading="usersLoading"
+                              :total="users.total"
+                              :shown-pagination="true"
+                              :pagination-info="paginationInfo"
+                              @page-change="handlePageChange">
+                        <v2-table-column label="Name" prop="name" align="left" width="250">
+                            <template slot-scope="row">
+                                <div @click="openProfile(row)" style="white-space: nowrap;" :class="{'link': !!row.slug}" class="cell-name">
+                                    <hc-avatar :user="row" style="display: inline-block; float: left;" />&nbsp;<div style="display: inline-block; padding: 5px 10px;">{{ row.name }}</div>
+                                </div>
+                            </template>
+                        </v2-table-column>
+                        <v2-table-column label="Verified" prop="isVerified" align="left">
+                            <template slot-scope="row">
+                                <i v-show="row.isVerified" class="fa fa-check-circle"></i>
+                            </template>
+                        </v2-table-column>
+                        <v2-table-column label="Lang" prop="language" align="left">
+                            <template slot-scope="row">
+                                <template v-if="row.language">
+                                    <img width="16" :src="`/assets/svg/flags/${row.language}.svg`" />
+                                </template>
+                                <template v-else>
+                                    -
+                                </template>
+                            </template>
+                        </v2-table-column>
+                        <v2-table-column label="Role" prop="role" align="left"></v2-table-column>
+                    </v2-table>
+                </no-ssr>
+            </b-tab-item>
+            <b-tab-item label="Invite Codes">
+                <div class="field isGrouped columns">
+                    <div class="control column">
+                        <textarea v-model.trim="form.codes" class="textarea" rows="8" placeholder="emails"></textarea>
+                    </div>
+                    <div class="control column">
+                        <textarea class="textarea is-disabled" rows="8" readonly placeholder="results">{{ results }}</textarea>
+                    </div>
+                </div>
+                <div class="field">
+                    <div class="control">
+                        <hc-button color="danger"
+                                   @click="generateInviteCodes()"
+                                   :isLoading="isLoading"
+                                   :disabled="isLoading">
+                            <hc-icon set="fa" icon="magic"></hc-icon> &nbsp;<strong>{{ $t('component.admin.-', 'Generate Invite-Codes') }}</strong>
+                        </hc-button>
+                    </div>
+                </div>
+            </b-tab-item>
+        </b-tabs>
+    </section>
 </template>
 
 <script>
@@ -80,6 +83,7 @@
         usersLoading: true,
         results: '',
         users: [],
+        userSearch: '',
         currentPage: 1,
         paginationInfo: {
           text: this.paginationText
@@ -111,6 +115,11 @@
       },
       paginationText () {
         return `<span>Total of <strong>${this.user ? this.user.total : 0}</strong>, <strong>${this.usersLimit}</strong> per page</span>`
+      }
+    },
+    watch: {
+      userSearch (val) {
+        this.searchUsers()
       }
     },
     methods: {
@@ -156,6 +165,15 @@
           }
         })
         this.usersLoading = false
+      },
+      async searchUsers () {
+        this.usersLoading = true
+        this.users = await feathers.service('users').find({
+          query: {
+            email: {$search: this.userSearch}
+          }
+        })
+        this.usersLoading = false
       }
     },
     head () {
@@ -167,19 +185,19 @@
 </script>
 
 <style scoped lang="scss">
-  @import 'assets/styles/utilities';
+    @import 'assets/styles/utilities';
 
-  .cell-name {
-    font-weight: bold;
-  }
+    .cell-name {
+        font-weight: bold;
+    }
 
-  .link {
-    white-space: nowrap;
-    cursor: pointer;
-    color: $primary;
-  }
+    .link {
+        white-space: nowrap;
+        cursor: pointer;
+        color: $primary;
+    }
 
-  .fa-check-circle {
-    color: $primary;
-  }
+    .fa-check-circle {
+        color: $primary;
+    }
 </style>
