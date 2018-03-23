@@ -26,7 +26,7 @@
     </nuxt-link>
     <nuxt-link to="/admin/comments" class="menu-item">
       <span class="menu-icon">
-        <hc-icon icon="comments"></hc-icon>
+        <hc-icon icon="bolt"></hc-icon>
       </span>
       {{ $t('component.admin.comments', 'Kommentare') }}
     </nuxt-link>

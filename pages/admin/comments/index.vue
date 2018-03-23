@@ -6,15 +6,25 @@
             <p class="control"><input type="text" placeholder="search Comments" v-model="commentSearch" class="input"></p>
         </div>
         <no-ssr>
-            <v2-table :data="comments.data"
-                      :loading="commentsLoading"
-                      :total="comments.total"
-                      :shown-pagination="true"
-                      :pagination-info="paginationInfo"
-                      @page-change="handlePageChange">
-                <v2-table-column label="Content" prop="content" align="left">
+            <v2-table
+                  :data="comments.data"
+                  :loading="commentsLoading"
+                  :total="comments.total"
+                  :shown-pagination="true"
+                  :pagination-info="paginationInfo"
+                  @page-change="handlePageChange">
+                <v2-table-column label="Username" width="50" align="left">
                     <template slot-scope="row">
-                        <p>{{ row }}</p>
+                        <div @click="openProfile(row.user)" style="white-space: nowrap;" :class="{'link': !!row.user.slug}" class="cell-name">
+                            <hc-avatar :user="row.user" style="display: inline-block; float: left;" />&nbsp;<div style="display: inline-block; padding: 5px 10px;">{{ row.user.name }}</div>
+                        </div>
+                    </template>
+                </v2-table-column>
+                <v2-table-column label="Content" prop="contentExcerpt" align="left">
+                </v2-table-column>
+                <v2-table-column label="Actions" width="15">
+                    <template slot-scope="row">
+                        <hc-icon class="action" set="fa" icon="pencil"></hc-icon>
                     </template>
                 </v2-table-column>
             </v2-table>
@@ -25,6 +35,9 @@
 <script>
   import feathers from '~/plugins/feathers'
   import moment from 'moment'
+
+  import 'beautify-scrollbar/dist/index.css'
+  import 'v2-table/dist/index.css'
 
   let commentLimit = 10
 
@@ -77,6 +90,11 @@
       }
     },
     methods: {
+      openProfile (user) {
+        if (user.slug) {
+          this.$router.push(`/profile/${user.slug}`)
+        }
+      },
       async handlePageChange (page) {
         this.currentPage = page
         this.commentsLoading = true
@@ -123,5 +141,9 @@
 
     .fa-check-circle {
         color: $primary;
+    }
+
+    .action {
+        cursor: pointer;
     }
 </style>
